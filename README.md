@@ -5,7 +5,7 @@ Python classes implementing common RDF ontologies with type checking.
 
 ## Development
 
-These development instructions requires [poetry](https://python-poetry.org/).
+These development instructions require [poetry](https://python-poetry.org/).
 
 Install dependencies:
 
