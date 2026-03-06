@@ -2,6 +2,7 @@
 RDF Core Object
 '''
 
+from abc import abstractmethod
 from collections.abc import Sequence
 from pydantic import BaseModel, ConfigDict, Field
 import rdflib as rdf
@@ -88,7 +89,9 @@ class RDF(BaseModel, frozen=True):
 
         return result
 
-    def to_graph(self, node: rdf.Node | None = None, graph=rdf.Graph()) -> rdf.Graph:
+    def to_graph(self, node: rdf.Node | None = None, graph: rdf.Graph | None = None) -> rdf.Graph:
+        if graph is None:
+            graph = rdf.Graph()
 
         def handle_value(graph, parent, v):
             if v is None:
@@ -128,12 +131,9 @@ class RDF(BaseModel, frozen=True):
 
         # fields
         for f, v in self:
-            if f == "rdf_id":
+            if f in ["rdf_id", "rdf_type", "rdf_bindings"]:
                 continue
-            elif f == "rdf_type":
-                continue
-            else:
-                handle_value(graph, s, v)
+            handle_value(graph, s, v)
 
         for b, ns in self.rdf_bindings:
             graph.bind(b, rdf.Namespace(ns))
@@ -141,26 +141,22 @@ class RDF(BaseModel, frozen=True):
         return graph
 
     @classmethod
-    def from_graph(cls, id: str, graph: rdf.Graph):
-        # id
-        rdf_type = cls.model_fields["rdf_type"].default
-        type_names = rdf_type if isinstance(rdf_type, list) else [rdf_type]
-        types: list[rdf.Node] = list(map(lambda t: rdf.URIRef(t), type_names))
-        rdf_id = None
-        for subject in graph.subjects(rdf.RDF.type, types):
-            rdf_id = str(subject)
-            break
-        # fields
-        fields = {}
-        for field_name in cls.model_fields:
-            if field_name == "rdf_id":
-                continue
-            elif field_name == "rdf_type":
-                continue
-            else:
-                rdf_property = cls._get_rdf_annotation(field_name)
-                fields[field_name] = graph.value(rdf.URIRef(id), rdf.URIRef(rdf_property))
-        return cls(rdf_id=rdf_id, **fields)
+    @abstractmethod
+    def from_graph[T](cls: T, id: str | rdf.Node, graph: rdf.Graph) -> T:
+        ...
+
+    @staticmethod
+    def _node_id(id: str | rdf.Node) -> tuple[rdf.Node, str | None]:
+        if isinstance(id, rdf.URIRef):
+            node = id
+            rdf_id = str(id)
+        elif isinstance(id, rdf.Node):
+            node = id
+            rdf_id = None
+        else:
+            node = rdf.URIRef(id)
+            rdf_id = id
+        return node, rdf_id
 
     @classmethod
     def _get_rdf_annotation(cls, field) -> str:
@@ -168,6 +164,14 @@ class RDF(BaseModel, frozen=True):
         for ann in anns:
             if "rdf_property" in ann:
                 return ann["rdf_property"]
+        raise Exception(f"no RDF property for model field {field}")
+
+    @classmethod
+    def _get_rdf_property(cls, field: str) -> rdf.URIRef:
+        anns = cls.model_fields[field].metadata
+        for ann in anns:
+            if "rdf_property" in ann:
+                return rdf.URIRef(ann["rdf_property"])
         raise Exception(f"no RDF property for model field {field}")
 
     @classmethod

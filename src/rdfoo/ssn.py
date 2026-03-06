@@ -8,6 +8,7 @@ Namespace for SSN terms: ``http://www.w3.org/ns/ssn/``
 Namespace for SOSA terms: ``http://www.w3.org/ns/sosa/``
 '''
 
+import rdflib
 from typing import Annotated
 
 from .rdf import RDF, RDFType
@@ -30,3 +31,14 @@ class Property(RDF, frozen=True):
         str | None,
         {"rdf_property": "http://purl.org/dc/terms/description"},
     ] = None
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        node, rdf_id = cls._node_id(id)
+        label = graph.value(node, rdflib.RDFS.label)
+        description = graph.value(node, rdflib.DCTERMS.description)
+        return Property(**{
+            "rdf_id": rdf_id,
+            "label": label,
+            "description": description,
+        })

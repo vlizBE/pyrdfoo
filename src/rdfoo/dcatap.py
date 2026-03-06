@@ -8,6 +8,7 @@ Namespace: ``http://data.europa.eu/r5r/``
 
 from collections.abc import Sequence
 from datetime import date, datetime
+import rdflib
 from typing import Annotated
 
 from . import dcat
@@ -50,6 +51,11 @@ class Catalogue(dcat.Catalogue, frozen=True):
     ] = ... # type: ignore
     '''A name given to the Catalogue.'''
 
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        catalogue = dcat.Catalogue.from_graph(id, graph)
+        return Catalogue(**catalogue.model_dump())
+
 
 CataloguedResource = dcat.CataloguedResource
 
@@ -66,11 +72,6 @@ class Dataset(dcat.Dataset, frozen=True):
         {"rdf_property": "http://purl.org/dc/terms/description"},
     ] = ... # type: ignore
 
-    issued: Annotated[
-        date | datetime | None,
-        {"rdf_property": "http://purl.org/dc/terms/issued"}
-    ] = None
-
     qualified_attribution: Annotated[
         Sequence[RDFRef["Attribution"]],
         {"rdf_property": "http://www.w3.org/ns/prov#qualifiedAttribution"},
@@ -86,38 +87,34 @@ class Dataset(dcat.Dataset, frozen=True):
         {"rdf_property": "http://purl.org/dc/terms/title"},
     ] = ... # type: ignore
 
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        node, _ = cls._node_id(id)
+        dataset = dcat.Dataset.from_graph(id, graph)
+        # source
+        source_objects = graph.objects(node, cls._get_rdf_property("source"))
+        source = [Resource.from_graph(obj, graph) for obj in source_objects]
+        # Dataset
+        return Dataset(
+            **dataset.model_dump(),
+            source=source,
+        )
 
-class Distribution(dcat.Distribution, frozen=True):
-    '''
-    A physical embodiment of the Dataset in a particular format.
 
-    See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Distribution
-    '''
+Distribution = dcat.Distribution
+'''
+A physical embodiment of the Dataset in a particular format.
+
+See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Distribution
+'''
 
 
-class Location(RDF, frozen=True):
-    '''
-    A spatial region or named place.
+Location = dcat.Location
+'''
+A spatial region or named place.
 
-    See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Location
-    '''
-
-    rdf_type: RDFType = "http://purl.org/dc/terms/Location"
-
-    bbox: Annotated[
-        str | None,
-        {"rdf_property": "http://www.w3.org/ns/dcat#bbox"},
-    ] = None
-
-    centroid: Annotated[
-        str | None,
-        {"rdf_property": "http://www.w3.org/ns/dcat#centroid"},
-    ] = None
-
-    geometry: Annotated[
-        str | None,
-        {"rdf_property": "https://www.w3.org/ns/locn#locn:geometry"},
-    ] = None
+See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Location
+'''
 
 
 #
@@ -144,13 +141,31 @@ class Attribution(RDF, frozen=True):
         {"rdf_property": "https://www.w3.org/ns/dcat#hadRole"},
     ] = None
 
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        node, rdf_id = cls._node_id(id)
+        # start_date
+        agent_obj = graph.value(node, cls._get_rdf_property("agent"))
+        agent = Agent.from_graph(agent_obj, graph) if agent_obj is not None else None
+        if agent is None:
+            raise Exception("Attribution must have an agent")
+        # end_date
+        hadRole_obj = graph.value(node, cls._get_rdf_property("hadRole"))
+        hadRole = Role.from_graph(hadRole_obj, graph) if hadRole_obj is not None else None
+        # Attribution
+        return Attribution(
+            rdf_id=rdf_id,
+            agent=agent,
+            hadRole=hadRole,
+        )
 
-class PeriodOfTime(dcat.PeriodOfTime, frozen=True):
-    '''
-    An interval of time that is named or defined by its start and end dates.
 
-    See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#PeriodofTime
-    '''
+PeriodOfTime = dcat.PeriodOfTime
+'''
+An interval of time that is named or defined by its start and end dates.
+
+See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#PeriodofTime
+'''
 
 
 class Role(RDF, frozen=True):
@@ -162,4 +177,9 @@ class Role(RDF, frozen=True):
     '''
 
     rdf_type: RDFType = "https://www.w3.org/ns/dcat#Role"
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        _, rdf_id = cls._node_id(id)
+        return Role(rdf_id=rdf_id)
 

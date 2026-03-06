@@ -6,6 +6,9 @@ Ontology documentation: https://www.w3.org/TR/vcard-rdf/
 Namespace: ``http://www.w3.org/2006/vcard/ns#``
 '''
 
+import rdflib
+from typing import Annotated
+
 from .rdf import RDF, RDFRef, RDFType
 
 
@@ -16,9 +19,20 @@ class Kind(RDF, frozen=True):
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Kind"
 
-    fn: str
+    fn: Annotated[
+        str,
+        {"rdf_property": "http://purl.org/dc/terms/description"},
+    ]
     '''Full name.'''
-    ...
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        node, rdf_id = cls._node_id(id)
+        fn = graph.value(node, rdflib.URIRef("http://www.w3.org/2006/vcard/ns#Kind"))
+        return Kind(
+            rdf_id=rdf_id,
+            fn=str(fn),
+        )
 
 
 class Group(Kind, frozen=True):
@@ -31,6 +45,11 @@ class Group(Kind, frozen=True):
 
     has_member: list[RDFRef["Individual | Organization"]]
 
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        kind = Kind.from_graph(id, graph)
+        return Group(**kind.model_dump())
+
 
 class Individual(Kind, frozen=True):
     '''
@@ -39,6 +58,11 @@ class Individual(Kind, frozen=True):
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Individual"
 
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        kind = Kind.from_graph(id, graph)
+        return Individual(**kind.model_dump())
+
 
 class Location(Kind, frozen=True):
     '''
@@ -46,6 +70,11 @@ class Location(Kind, frozen=True):
     '''
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Location"
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        kind = Kind.from_graph(id, graph)
+        return Location(**kind.model_dump())
 
 
 class Organization(Kind, frozen=True):
@@ -56,3 +85,8 @@ class Organization(Kind, frozen=True):
     '''
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Organization"
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        kind = Kind.from_graph(id, graph)
+        return Organization(**kind.model_dump())
