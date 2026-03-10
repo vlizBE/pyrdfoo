@@ -7,7 +7,6 @@ Namespace: ``http://data.europa.eu/r5r/``
 '''
 
 from collections.abc import Sequence
-from datetime import date, datetime
 import rdflib
 from typing import Annotated
 

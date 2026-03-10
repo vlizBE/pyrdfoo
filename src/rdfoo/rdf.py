@@ -78,9 +78,7 @@ class RDF(BaseModel, frozen=True):
 
         # fields
         for f, v in self:
-            if f == "rdf_id":
-                continue
-            elif f == "rdf_type":
+            if f in ["rdf_id", "rdf_type", "rdf_bindings"]:
                 continue
             elif v is None:
                 pass
@@ -99,9 +97,10 @@ class RDF(BaseModel, frozen=True):
             elif isinstance(v, RDFURIRef):
                 graph.add((parent, rdf.URIRef(self._get_rdf_annotation(f)), rdf.URIRef(v.uri)))
             elif isinstance(v, RDF):
-                n = rdf.BNode()
                 if v.rdf_id is not None:
                     n = rdf.URIRef(v.rdf_id)
+                else:
+                    n = rdf.BNode()
                 graph.add((parent, rdf.URIRef(self._get_rdf_annotation(f)), n))
                 v.to_graph(n, graph)
             elif isinstance(v, str):
@@ -175,7 +174,7 @@ class RDF(BaseModel, frozen=True):
         raise Exception(f"no RDF property for model field {field}")
 
     @classmethod
-    def get_rdf_type(cls, extra: RDFType = []) -> RDFType:
+    def get_rdf_type(cls, *, extra: RDFType = []) -> RDFType:
         if isinstance(extra, str):
             extra = [extra]
         rdf_type = cls.model_fields["rdf_type"].default

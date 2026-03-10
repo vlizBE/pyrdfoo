@@ -18,7 +18,7 @@ from .ssn import Property
 
 class Dataset(dcatap.Dataset, frozen=True):
 
-    rdf_type: RDFType = dcatap.Dataset.get_rdf_type("http://www.w3.org/ns/sosa/ObservationCollection")
+    rdf_type: RDFType = dcatap.Dataset.get_rdf_type(extra="http://www.w3.org/ns/sosa/ObservationCollection")
 
     observed_property: Annotated[
         Sequence[RDFRef[Property]],

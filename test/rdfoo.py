@@ -6,7 +6,7 @@ from rdfoo.rdf import RDF, RDFType, uri
 
 class RDFTestCase(unittest.TestCase):
 
-    def assetRDFType(self, obj: RDF, rdf_type: RDFType):
+    def assertRDFType(self, obj: RDF, rdf_type: RDFType):
         obj_types: list[str] = obj.rdf_type if isinstance(obj.rdf_type, list) else [obj.rdf_type]
         check_types: list[str] = rdf_type if isinstance(rdf_type, list) else [rdf_type]
         for t in check_types:
@@ -17,27 +17,27 @@ class TestDCAT(RDFTestCase):
 
     def test_create_catalogue(self):
         obj = dcat.Catalogue()
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
 
     def test_create_catalogued_resource(self):
         obj = dcat.CataloguedResource()
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
 
     def test_create_dataset(self):
         obj = dcat.Dataset()
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
 
     def test_create_distribution(self):
         obj = dcat.Distribution()
-        self.assetRDFType(obj, "http://www.w3.org/ns/dcat#Distribution")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Distribution")
 
     def test_create_period_of_time(self):
         obj = dcat.PeriodOfTime()
-        self.assetRDFType(obj, "http://purl.org/dc/terms/PeriodOfTime")
+        self.assertRDFType(obj, "http://purl.org/dc/terms/PeriodOfTime")
 
     def test_create_location(self):
         obj = dcat.Location()
-        self.assetRDFType(obj, "http://purl.org/dc/terms/Location")
+        self.assertRDFType(obj, "http://purl.org/dc/terms/Location")
 
     def test_from_graph_001(self):
         id = "urn:test:TestDCAT:test_from_graph_001:catalogue"
@@ -90,30 +90,30 @@ class TestDCATAP(RDFTestCase):
             description="A test catalogue.",
             publisher=uri("https://marineinfo.org/id/institute/36"),
         )
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
 
     def test_create_catalogued_resource(self):
         obj = dcatap.CataloguedResource()
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
 
     def test_create_dataset(self):
         obj = dcatap.Dataset(
             title="Test Dataset",
             description="A test dataset.",
         )
-        self.assetRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
+        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
 
     def test_create_distribution(self):
         obj = dcatap.Distribution()
-        self.assetRDFType(obj, "http://www.w3.org/ns/dcat#Distribution")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Distribution")
 
     def test_create_period_of_time(self):
         obj = dcatap.PeriodOfTime()
-        self.assetRDFType(obj, "http://purl.org/dc/terms/PeriodOfTime")
+        self.assertRDFType(obj, "http://purl.org/dc/terms/PeriodOfTime")
 
     def test_create_location(self):
         obj = dcatap.Location()
-        self.assetRDFType(obj, "http://purl.org/dc/terms/Location")
+        self.assertRDFType(obj, "http://purl.org/dc/terms/Location")
 
     def test_from_graph_001(self):
         id = "urn:test:TestDCATAP:test_from_graph_001:catalogue"

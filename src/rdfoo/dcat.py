@@ -105,7 +105,7 @@ class CataloguedResource(Resource, frozen=True):
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Resource
     '''
 
-    rdf_type: RDFType = Resource.get_rdf_type("https://www.w3.org/ns/dcat#Resource")
+    rdf_type: RDFType = Resource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Resource")
 
     contact_point: Annotated[
         Sequence[RDFRef[Kind]] | None,
@@ -207,7 +207,7 @@ class Dataset(CataloguedResource, frozen=True):
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Dataset
     '''
 
-    rdf_type: RDFType = CataloguedResource.get_rdf_type("https://www.w3.org/ns/dcat#Dataset")
+    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Dataset")
 
     distribution: Annotated[
         Sequence[RDFRef["Distribution"]] | None,
