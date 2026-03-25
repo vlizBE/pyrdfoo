@@ -26,3 +26,5 @@ implement diverse ontologies.
    rdfoo.ssn
    rdfoo.vcard
    rdfoo.vliz
+   rdfoo.prov
+   rdfoo.provone

@@ -1,10 +1,10 @@
-'''
+"""
 vCard Ontology - for describing People and Organizations
 
 Ontology documentation: https://www.w3.org/TR/vcard-rdf/
 
 Namespace: ``http://www.w3.org/2006/vcard/ns#``
-'''
+"""
 
 import rdflib
 from typing import Annotated
@@ -13,9 +13,9 @@ from .rdf import RDF, RDFRef, RDFType
 
 
 class Kind(RDF, frozen=True):
-    '''
+    """
     The parent class for all objects.
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Kind"
 
@@ -23,7 +23,7 @@ class Kind(RDF, frozen=True):
         str,
         {"rdf_property": "http://purl.org/dc/terms/description"},
     ]
-    '''Full name.'''
+    """Full name."""
 
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
@@ -36,10 +36,10 @@ class Kind(RDF, frozen=True):
 
 
 class Group(Kind, frozen=True):
-    '''
+    """
     Object representing a group of persons or entities. A group object will
     usually contain `has_member` properties to specify the members of the group.
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Group"
 
@@ -52,9 +52,9 @@ class Group(Kind, frozen=True):
 
 
 class Individual(Kind, frozen=True):
-    '''
+    """
     An object representing a single person or entity.
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Individual"
 
@@ -65,9 +65,9 @@ class Individual(Kind, frozen=True):
 
 
 class Location(Kind, frozen=True):
-    '''
+    """
     An object representing a named geographical place
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Location"
 
@@ -78,11 +78,11 @@ class Location(Kind, frozen=True):
 
 
 class Organization(Kind, frozen=True):
-    '''
+    """
     An object representing an organization. An organization is a single entity,
     and might represent a business or government, a department or division
     within a business or government, a club, an association, or the like.
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/2006/vcard/ns#Organization"
 
