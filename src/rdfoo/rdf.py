@@ -117,7 +117,7 @@ class RDF(BaseModel, frozen=True):
         elif self.rdf_id is not None:
             s = rdf.URIRef(self.rdf_id)
         else:
-            raise Exception("node without identifier")
+            s = rdf.BNode()
 
         # type
         if isinstance(self.rdf_type, str):
