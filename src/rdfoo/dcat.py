@@ -12,6 +12,8 @@ import rdflib
 from typing import Annotated
 
 from . import dcterms
+
+from .dcterms import PeriodOfTime
 from .foaf import Agent
 from .rdf import RDF, RDFRef, RDFType, uri
 from .rdfs import Resource
@@ -24,7 +26,7 @@ class Catalogue(RDF, frozen=True):
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Catalog
     """
 
-    rdf_type: RDFType = "https://www.w3.org/ns/dcat#Catalog"
+    rdf_type: RDFType = "http://www.w3.org/ns/dcat#Catalog"
 
     dataset: Annotated[
         Sequence[RDFRef["Dataset"]] | None,
@@ -105,7 +107,7 @@ class CataloguedResource(Resource, frozen=True):
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Resource
     """
 
-    rdf_type: RDFType = Resource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Resource")
+    rdf_type: RDFType = Resource.get_rdf_type(extra="http://www.w3.org/ns/dcat#Resource")
 
     contact_point: Annotated[
         Sequence[RDFRef[Kind]] | None,
@@ -207,7 +209,7 @@ class Dataset(CataloguedResource, frozen=True):
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Dataset
     """
 
-    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Dataset")
+    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="http://www.w3.org/ns/dcat#Dataset")
 
     distribution: Annotated[
         Sequence[RDFRef["Distribution"]] | None,
@@ -225,7 +227,7 @@ class Dataset(CataloguedResource, frozen=True):
     ] = None
 
     temporal: Annotated[
-        Sequence[RDFRef["PeriodOfTime"]] | None,
+        Sequence[RDFRef[PeriodOfTime]] | None,
         {"rdf_property": "http://purl.org/dc/terms/temporal"},
     ] = None
 
@@ -330,42 +332,6 @@ class Relationship(RDF, frozen=True):
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
         _, rdf_id = cls._node_id(id)
         return Relationship(rdf_id=rdf_id)
-
-
-class PeriodOfTime(RDF, frozen=True):
-    """
-    An interval of time that is named or defined by its start and end.
-
-    See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Period_of_Time
-    """
-
-    rdf_type: RDFType = "http://purl.org/dc/terms/PeriodOfTime"
-
-    end_date: Annotated[
-        date | None,
-        {"rdf_property": "http://www.w3.org/ns/dcat#endDate"},
-    ] = None
-
-    start_date: Annotated[
-        date | None,
-        {"rdf_property": "https://www.w3.org/ns/dcat#startDate"},
-    ] = None
-
-    @classmethod
-    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
-        node, rdf_id = cls._node_id(id)
-        # start_date
-        start_obj = graph.value(node, cls._get_rdf_property("start_date"))
-        start_date = datetime.fromisoformat(str(start_obj)) if start_obj is not None else None
-        # end_date
-        end_obj = graph.value(node, cls._get_rdf_property("end_date"))
-        end_date = datetime.fromisoformat(str(end_obj)) if end_obj is not None else None
-        # PeriodOfTime
-        return PeriodOfTime(
-            rdf_id=rdf_id,
-            start_date=start_date,
-            end_date=end_date,
-        )
 
 
 class Location(dcterms.Location, frozen=True):

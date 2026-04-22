@@ -137,7 +137,7 @@ class Attribution(RDF, frozen=True):
 
     hadRole: Annotated[
         RDFRef["Role"] | None,
-        {"rdf_property": "https://www.w3.org/ns/dcat#hadRole"},
+        {"rdf_property": "http://www.w3.org/ns/dcat#hadRole"},
     ] = None
 
     @classmethod
@@ -175,7 +175,7 @@ class Role(RDF, frozen=True):
     See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Role
     """
 
-    rdf_type: RDFType = "https://www.w3.org/ns/dcat#Role"
+    rdf_type: RDFType = "http://www.w3.org/ns/dcat#Role"
 
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):

@@ -12,18 +12,18 @@ class TestDCATAP(RDFTestCase):
             description="A test catalogue.",
             publisher=uri("https://marineinfo.org/id/institute/36"),
         )
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Catalog")
 
     def test_create_catalogued_resource(self):
         obj = dcatap.CataloguedResource()
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Resource")
 
     def test_create_dataset(self):
         obj = dcatap.Dataset(
             title="Test Dataset",
             description="A test dataset.",
         )
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Dataset")
 
     def test_create_distribution(self):
         obj = dcatap.Distribution()

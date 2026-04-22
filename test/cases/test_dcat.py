@@ -10,15 +10,15 @@ class TestDCAT(RDFTestCase):
 
     def test_create_catalogue(self):
         obj = dcat.Catalogue()
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Catalog")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Catalog")
 
     def test_create_catalogued_resource(self):
         obj = dcat.CataloguedResource()
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Resource")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Resource")
 
     def test_create_dataset(self):
         obj = dcat.Dataset()
-        self.assertRDFType(obj, "https://www.w3.org/ns/dcat#Dataset")
+        self.assertRDFType(obj, "http://www.w3.org/ns/dcat#Dataset")
 
     def test_create_distribution(self):
         obj = dcat.Distribution()
