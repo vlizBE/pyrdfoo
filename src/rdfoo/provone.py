@@ -51,7 +51,7 @@ class Controller(Entity, frozen=True):
     """URL of the item."""
 
     version: Annotated[
-        str | None, {"rdf_property": "http://www.w3.org/ns/dcat#version"}
+        str | None, {"rdf_property": "http://purl.org/pav/version"}
     ] = None
     """The version indicator (name or identifier) of a resource."""
 
@@ -150,7 +150,7 @@ class Program(Plan, frozen=True):
     """Inverse property of hasSubProgram."""
 
     version: Annotated[
-        str | None, {"rdf_property": "http://www.w3.org/ns/dcat#version"}
+        str | None, {"rdf_property": "http://purl.org/pav/version"}
     ] = None
     """The version indicator (name or identifier) of a resource."""
 
