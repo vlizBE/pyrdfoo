@@ -1,10 +1,10 @@
-'''
+"""
 Data Catalog Vocabulary (DCAT) - Version 3
 
 Ontology documentation: https://www.w3.org/TR/vocab-dcat-3/
 
 Namespace: ``http://www.w3.org/ns/dcat#``
-'''
+"""
 
 from collections.abc import Sequence
 from datetime import date, datetime
@@ -12,44 +12,46 @@ import rdflib
 from typing import Annotated
 
 from . import dcterms
+
+from .dcterms import PeriodOfTime
 from .foaf import Agent
 from .rdf import RDF, RDFRef, RDFType, uri
 from .rdfs import Resource
 from .vcard import Kind
 
 class Catalogue(RDF, frozen=True):
-    '''
+    """
     A curated collection of metadata about resources.
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Catalog
-    '''
+    """
 
-    rdf_type: RDFType = "https://www.w3.org/ns/dcat#Catalog"
+    rdf_type: RDFType = "http://www.w3.org/ns/dcat#Catalog"
 
     dataset: Annotated[
         Sequence[RDFRef["Dataset"]] | None,
         {"rdf_property": "http://www.w3.org/ns/dcat#dataset"},
     ] = None
-    '''A Dataset that is part of the Catalogue.'''
+    """A Dataset that is part of the Catalogue."""
 
     description: Annotated[
         str | Sequence[str] | None,
         {"rdf_property": "http://purl.org/dc/terms/description"},
     ] = None
-    '''A free-text account of the Catalogue.'''
+    """A free-text account of the Catalogue."""
 
     publisher: Annotated[
         RDFRef[Agent] | None,
         {"rdf_property": "http://purl.org/dc/terms/publisher"},
     ] = None
-    '''An entity (organisation) responsible for making the Catalogue
-    available.'''
+    """An entity (organisation) responsible for making the Catalogue
+    available."""
 
     title: Annotated[
         Sequence[str] | str | None,
         {"rdf_property": "http://purl.org/dc/terms/title"},
     ] = None
-    '''A name given to the Catalogue.'''
+    """A name given to the Catalogue."""
 
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
@@ -73,8 +75,8 @@ class Catalogue(RDF, frozen=True):
         agent_type = Agent.get_rdf_type()
         if agent_type is str:
             agent_type = [agent_type]
-        def flatten(xss):
-            return [x for xs in xss for x in xs]
+
+        def flatten(xss): return [x for xs in xss for x in xs]
         if len(flatten([graph.triples((publisher_object, rdflib.RDF.type, rdflib.URIRef(t))) for t in agent_type])) > 0:
             publisher = Agent.from_graph(publisher_object, graph) if publisher_object is not None else None
         else:
@@ -99,13 +101,13 @@ class Catalogue(RDF, frozen=True):
 
 
 class CataloguedResource(Resource, frozen=True):
-    '''
+    """
     Resource published or curated by a single agent.
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Resource
-    '''
+    """
 
-    rdf_type: RDFType = Resource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Resource")
+    rdf_type: RDFType = Resource.get_rdf_type(extra="http://www.w3.org/ns/dcat#Resource")
 
     contact_point: Annotated[
         Sequence[RDFRef[Kind]] | None,
@@ -200,14 +202,14 @@ class CataloguedResource(Resource, frozen=True):
 
 
 class Dataset(CataloguedResource, frozen=True):
-    '''
+    """
     A collection of data, published or curated by a single agent, and available
     for access or download in one or more representations.
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Dataset
-    '''
+    """
 
-    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="https://www.w3.org/ns/dcat#Dataset")
+    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="http://www.w3.org/ns/dcat#Dataset")
 
     distribution: Annotated[
         Sequence[RDFRef["Distribution"]] | None,
@@ -225,7 +227,7 @@ class Dataset(CataloguedResource, frozen=True):
     ] = None
 
     temporal: Annotated[
-        Sequence[RDFRef["PeriodOfTime"]] | None,
+        Sequence[RDFRef[PeriodOfTime]] | None,
         {"rdf_property": "http://purl.org/dc/terms/temporal"},
     ] = None
 
@@ -265,7 +267,7 @@ class Dataset(CataloguedResource, frozen=True):
 
 
 class Distribution(RDF, frozen=True):
-    '''
+    """
     A specific representation of a dataset. A dataset might be available in
     multiple serializations that may differ in various ways, including natural
     language, media-type or format, schematic organization, temporal and spatial
@@ -273,7 +275,7 @@ class Distribution(RDF, frozen=True):
     the above).
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Distribution
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/ns/dcat#Distribution"
 
@@ -317,12 +319,12 @@ class Distribution(RDF, frozen=True):
 
 
 class Relationship(RDF, frozen=True):
-    '''
+    """
     An association class for attaching additional information to a relationship
     between DCAT Resources.
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Relationship
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/ns/dcat#Relationship"
 
@@ -332,48 +334,12 @@ class Relationship(RDF, frozen=True):
         return Relationship(rdf_id=rdf_id)
 
 
-class PeriodOfTime(RDF, frozen=True):
-    '''
-    An interval of time that is named or defined by its start and end.
-
-    See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Period_of_Time
-    '''
-
-    rdf_type: RDFType = "http://purl.org/dc/terms/PeriodOfTime"
-
-    end_date: Annotated[
-        date | None,
-        {"rdf_property": "http://www.w3.org/ns/dcat#endDate"},
-    ] = None
-
-    start_date: Annotated[
-        date | None,
-        {"rdf_property": "https://www.w3.org/ns/dcat#startDate"},
-    ] = None
-
-    @classmethod
-    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
-        node, rdf_id = cls._node_id(id)
-        # start_date
-        start_obj = graph.value(node, cls._get_rdf_property("start_date"))
-        start_date = datetime.fromisoformat(str(start_obj)) if start_obj is not None else None
-        # end_date
-        end_obj = graph.value(node, cls._get_rdf_property("end_date"))
-        end_date = datetime.fromisoformat(str(end_obj)) if end_obj is not None else None
-        # PeriodOfTime
-        return PeriodOfTime(
-            rdf_id=rdf_id,
-            start_date=start_date,
-            end_date=end_date,
-        )
-
-
 class Location(dcterms.Location, frozen=True):
-    '''
+    """
     A spatial region or named place.
 
     See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Location
-    '''
+    """
 
     bbox: Annotated[
         str | None,

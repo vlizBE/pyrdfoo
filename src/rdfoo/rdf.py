@@ -1,6 +1,6 @@
-'''
+"""
 RDF Core Object
-'''
+"""
 
 from abc import abstractmethod
 from collections.abc import Sequence
@@ -10,22 +10,22 @@ from typing import TypeVar
 
 
 def RDFId(default=None):
-    '''Helper function to create an `rdf_id` field with a default value.'''
+    """Helper function to create an `rdf_id` field with a default value."""
     return Field(default=default, serialization_alias="@id")
 
 
 type RDFType = str | list[str]
-'''Type definition for the `rdf_type` field.'''
+"""Type definition for the `rdf_type` field."""
 
 
 class RDF(BaseModel, frozen=True):
-    '''
+    """
     Base class for RDF objects.
 
     This class provides the `to_graph` method that allows to generate an RDF
     graph for any of its subclasses. It also provides the `from_graph` method to
     construct an object described in a graph.
-    '''
+    """
     model_config = ConfigDict(
         validate_assignment=True,
         validate_by_name=True,
@@ -34,7 +34,7 @@ class RDF(BaseModel, frozen=True):
     rdf_id: str | None = RDFId()
     rdf_type: RDFType
     rdf_bindings: list[tuple[str, str]] = []
-    '''[[binding1, namespace1], [binding2, namespace2]]'''
+    """[[binding1, namespace1], [binding2, namespace2]]"""
 
     def has_type(self, type: RDFType) -> bool:
         own_types: list[str] = self.rdf_type if isinstance(self.rdf_type, list) else [self.rdf_type]
@@ -163,6 +163,7 @@ class RDF(BaseModel, frozen=True):
         for ann in anns:
             if "rdf_property" in ann:
                 return ann["rdf_property"]
+
         raise Exception(f"no RDF property for model field {field}")
 
     @classmethod
@@ -199,23 +200,32 @@ class RDF(BaseModel, frozen=True):
 
 
 T = TypeVar("T", bound=RDF)
-'''An RDF object.'''
+"""An RDF object."""
 
 
 class RDFURIRef[T](BaseModel):
-    '''
+    """
     Reference to a resource.
 
     This class is used to distinguish between a URI and a string literal.
-    '''
+    """
 
     uri: str = Field(serialization_alias="@id")
 
 
 def uri[T](uri: str):
-    '''Helper function to create an URI that references a resource.'''
+    """Helper function to create an URI that references a resource."""
     return RDFURIRef(uri=uri)
 
 
+def graph_node_rdf_types(graph: rdf.Graph, node: rdf.Node) -> RDFType | None:
+    """Helper function to retrieve graph node types"""
+    rdf_types = list(graph.objects(node, rdf.RDF.type, unique=True))
+    if rdf_types:
+        return [str(t) for t in rdf_types]
+
+    return None
+
+
 type RDFRef[T] = T | RDFURIRef[T]
-'''A resource object or a reference to one.'''
+"""A resource object or a reference to one."""

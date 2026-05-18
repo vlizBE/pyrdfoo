@@ -1,10 +1,10 @@
-'''
+"""
 FOAF Vocabulary Specification 0.99
 
 Ontology documentation: https://xmlns.com/foaf/spec/
 
 Namespace: ``http://xmlns.com/foaf/0.1/``
-'''
+"""
 
 import rdflib
 

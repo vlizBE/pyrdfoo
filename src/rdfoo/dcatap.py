@@ -1,10 +1,10 @@
-'''
+"""
 DCAT-AP 3.0.1
 
 Documentation: https://semiceu.github.io/DCAT-AP/releases/3.0.1/
 
 Namespace: ``http://data.europa.eu/r5r/``
-'''
+"""
 
 from collections.abc import Sequence
 import rdflib
@@ -24,31 +24,31 @@ from .rdfs import Resource
 
 
 class Catalogue(dcat.Catalogue, frozen=True):
-    '''
+    """
     A catalogue or repository that hosts the Datasets or Data Services being
     described.
 
     See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Catalogue
-    '''
+    """
 
     description: Annotated[
         str | Sequence[str],
         {"rdf_property": "http://purl.org/dc/terms/description"},
     ] = ... # type: ignore
-    '''A free-text account of the Catalogue.'''
+    """A free-text account of the Catalogue."""
 
     publisher: Annotated[
         RDFRef[Agent],
         {"rdf_property": "http://purl.org/dc/terms/publisher"},
     ] = ... # type: ignore
-    '''An entity (organisation) responsible for making the Catalogue
-    available.'''
+    """An entity (organisation) responsible for making the Catalogue
+    available."""
 
     title: Annotated[
         str | Sequence[str],
         {"rdf_property": "http://purl.org/dc/terms/title"},
     ] = ... # type: ignore
-    '''A name given to the Catalogue.'''
+    """A name given to the Catalogue."""
 
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
@@ -60,11 +60,11 @@ CataloguedResource = dcat.CataloguedResource
 
 
 class Dataset(dcat.Dataset, frozen=True):
-    '''
+    """
     A conceptual entity that represents the information published.
 
     See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Dataset
-    '''
+    """
 
     description: Annotated[
         str | Sequence[str],
@@ -101,19 +101,19 @@ class Dataset(dcat.Dataset, frozen=True):
 
 
 Distribution = dcat.Distribution
-'''
+"""
 A physical embodiment of the Dataset in a particular format.
 
 See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Distribution
-'''
+"""
 
 
 Location = dcat.Location
-'''
+"""
 A spatial region or named place.
 
 See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Location
-'''
+"""
 
 
 #
@@ -122,11 +122,11 @@ See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Location
 
 
 class Attribution(RDF, frozen=True):
-    '''
+    """
     Attribution is the ascribing of an entity to an agent.
 
     See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Attribution
-    '''
+    """
 
     rdf_type: RDFType = "http://www.w3.org/ns/prov#Attribution"
 
@@ -137,7 +137,7 @@ class Attribution(RDF, frozen=True):
 
     hadRole: Annotated[
         RDFRef["Role"] | None,
-        {"rdf_property": "https://www.w3.org/ns/dcat#hadRole"},
+        {"rdf_property": "http://www.w3.org/ns/dcat#hadRole"},
     ] = None
 
     @classmethod
@@ -160,22 +160,22 @@ class Attribution(RDF, frozen=True):
 
 
 PeriodOfTime = dcat.PeriodOfTime
-'''
+"""
 An interval of time that is named or defined by its start and end dates.
 
 See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#PeriodofTime
-'''
+"""
 
 
 class Role(RDF, frozen=True):
-    '''
+    """
     A role is the function of a resource or agent with respect to another
     resource, in the context of resource attribution or resource relationships.
 
     See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#Role
-    '''
+    """
 
-    rdf_type: RDFType = "https://www.w3.org/ns/dcat#Role"
+    rdf_type: RDFType = "http://www.w3.org/ns/dcat#Role"
 
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):

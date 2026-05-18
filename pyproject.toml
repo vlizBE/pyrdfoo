@@ -3,7 +3,8 @@ name = "rdfoo"
 version = "0.1.2"
 description = "Python classes implementing common RDF ontologies with type checking."
 authors = [
-    {name = "Jorge Mendes",email = "jorge.mendes@vliz.be"}
+    {name = "Jorge Mendes",email = "jorge.mendes@vliz.be"},
+    {name = "Bram Van der Streeck",email = "bram.van.der.streeck@vliz.be"}
 ]
 license = {text = "MIT"}
 readme = "README.md"
