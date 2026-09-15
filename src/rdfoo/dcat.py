@@ -15,7 +15,7 @@ from . import dcterms
 
 from .dcterms import PeriodOfTime
 from .foaf import Agent
-from .rdf import RDF, RDFRef, RDFType, uri
+from .rdf import RDF, RDFURIRef, RDFRef, RDFType, uri
 from .rdfs import Resource
 from .vcard import Kind
 
@@ -284,9 +284,19 @@ class Distribution(RDF, frozen=True):
         {"rdf_property": "http://www.w3.org/ns/dcat#accessURL"},
     ] = None
 
+    conforms_to: Annotated[
+        RDFURIRef | str | None,
+        {"rdf_property": "http://purl.org/dc/terms/conformsTo"},
+    ] = None
+
     description: Annotated[
         Sequence[str] | str | None,
         {"rdf_property": "http://purl.org/dc/terms/description"},
+    ] = None
+
+    format: Annotated[
+        str | None,
+        {"rdf_property": "http://purl.org/dc/terms/format"},
     ] = None
 
     @classmethod
@@ -301,6 +311,12 @@ class Distribution(RDF, frozen=True):
             access_url = access_url[0]
         else:
             access_url = None
+        # conforms_to
+        conforms_to = graph.value(node, cls._get_rdf_property("conforms_to"))
+        if type(conforms_to) is rdflib.URIRef:
+            conforms_to = RDFURIRef(uri=str(conforms_to))
+        else:
+            conforms_to = str(conforms_to) if conforms_to else None
         # description
         description_objects = graph.objects(node, cls._get_rdf_property("description"))
         descriptions = [str(obj) for obj in description_objects]
@@ -310,11 +326,16 @@ class Distribution(RDF, frozen=True):
             description = descriptions[0]
         else:
             description = None
+        # format
+        format = graph.value(node, cls._get_rdf_property("format"))
+        format = str(format) if format else None
         # Distribution
         return Distribution(
             rdf_id=rdf_id,
             access_url=access_url,
+            conforms_to=conforms_to,
             description=description,
+            format=format,
         )
 
 
