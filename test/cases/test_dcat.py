@@ -1,7 +1,9 @@
 import unittest
 
 from rdflib import Literal
+
 from rdfoo import dcat
+from rdfoo.rdf import RDFURIRef
 
 from utils import RDFTestCase
 
@@ -83,6 +85,23 @@ class TestDCAT(RDFTestCase):
         graph = dataset0.to_graph()
         dataset1 = dcat.Dataset.from_graph(id, graph)
         self.assertEqual(dataset0, dataset1)
+
+    def test_distribution_format(self):
+        dataset_id = "urn:test:dataset"
+        ref_dataset = dcat.Dataset(
+            rdf_id=dataset_id,
+            title="dataset",
+            distribution=[
+                dcat.Distribution(
+                    access_url="https://example.com/sample.nc",
+                    conforms_to=RDFURIRef(uri="https://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html"),
+                    format="application/netcdf"
+                )
+            ],
+        )
+        graph = ref_dataset.to_graph()
+        dataset = dcat.Dataset.from_graph(dataset_id, graph)
+        self.assertEqual(ref_dataset, dataset)
 
 
 if __name__ == "__main__":
