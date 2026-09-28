@@ -100,6 +100,14 @@ class Dataset(dcat.Dataset, frozen=True):
         )
 
 
+DataService = dcat.DataService
+"""
+A collection of operations that provides access to one or more datasets or data processing function
+
+See also: https://semiceu.github.io/DCAT-AP/releases/3.0.1/#DataService
+"""
+
+
 Distribution = dcat.Distribution
 """
 A physical embodiment of the Dataset in a particular format.

@@ -71,6 +71,33 @@ class TestDCAT(RDFTestCase):
         dataset1 = dcat.Dataset.from_graph(id, graph)
         self.assertEqual(dataset0, dataset1)
 
+    def test_data_service(self):
+        id = "urn:test:data_service"
+        ref_data_service = dcat.DataService(
+            rdf_id=id,
+            title="dataservice",
+            endpoint_url="https://example.com"
+        )
+        graph = ref_data_service.to_graph()
+        data_service = dcat.DataService.from_graph(id, graph)
+        self.assertEqual(data_service, ref_data_service)
+
+    def test_catalog_with_data_service(self):
+        id = "urn:test:catalog"
+        data_service = dcat.DataService(
+            rdf_id="urn:test:data_service",
+            title="dataservice",
+            endpoint_url="https://example.com"
+        )
+        ref_catalog = dcat.Catalogue(
+            rdf_id=id,
+            title="Catalogue",
+            service=[data_service],
+        )
+        graph = ref_catalog.to_graph()
+        catalog = dcat.Catalogue.from_graph(id, graph)
+        self.assertEqual(catalog, ref_catalog)
+
     def test_from_graph_004(self):
         id = "urn:test:TestDCAT:test_from_graph_004:dataset"
         dataset0 = dcat.Dataset(
@@ -85,6 +112,22 @@ class TestDCAT(RDFTestCase):
         graph = dataset0.to_graph()
         dataset1 = dcat.Dataset.from_graph(id, graph)
         self.assertEqual(dataset0, dataset1)
+
+    def test_distribution_with_data_service(self):
+        id = "urn:test:catalog"
+        data_service = dcat.DataService(
+            rdf_id="urn:test:data_service",
+            title="dataservice",
+            endpoint_url="https://example.com"
+        )
+        ref_distribution = dcat.Distribution(
+            rdf_id=id,
+            title="Catalogue",
+            access_service=[data_service],
+        )
+        graph = ref_distribution.to_graph()
+        distribution = dcat.Distribution.from_graph(id, graph)
+        self.assertEqual(distribution, ref_distribution)
 
     def test_distribution_format(self):
         dataset_id = "urn:test:dataset"
@@ -102,6 +145,14 @@ class TestDCAT(RDFTestCase):
         graph = ref_dataset.to_graph()
         dataset = dcat.Dataset.from_graph(dataset_id, graph)
         self.assertEqual(ref_dataset, dataset)
+
+    def test_catalog(self):
+        id = "urn:test:catalog"
+        sub_catalog = dcat.Catalogue(rdf_id="urn:test:sub_catalog", title="Sub catalogue")
+        ref_catalog = dcat.Catalogue(rdf_id=id, title="Catalogue", catalog=[sub_catalog])
+        graph = ref_catalog.to_graph()
+        catalog = dcat.Catalogue.from_graph(id, graph)
+        self.assertEqual(ref_catalog, catalog)
 
 
 if __name__ == "__main__":
