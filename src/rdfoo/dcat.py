@@ -28,6 +28,12 @@ class Catalogue(RDF, frozen=True):
 
     rdf_type: RDFType = "http://www.w3.org/ns/dcat#Catalog"
 
+    catalog: Annotated[
+        Sequence[RDFRef["Catalogue"]] | None,
+        {"rdf_property": "http://www.w3.org/ns/dcat#catalog"},
+    ] = None
+    """A Catalogue that is part of the Catalogue."""
+
     dataset: Annotated[
         Sequence[RDFRef["Dataset"]] | None,
         {"rdf_property": "http://www.w3.org/ns/dcat#dataset"},
@@ -47,6 +53,12 @@ class Catalogue(RDF, frozen=True):
     """An entity (organisation) responsible for making the Catalogue
     available."""
 
+    service: Annotated[
+        Sequence[RDFRef["DataService"]] | None,
+        {"rdf_property": "http://www.w3.org/ns/dcat#service"},
+    ] = None
+    """A site or end-point (Data Service) that is listed in the Catalogue."""
+
     title: Annotated[
         Sequence[str] | str | None,
         {"rdf_property": "http://purl.org/dc/terms/title"},
@@ -56,6 +68,11 @@ class Catalogue(RDF, frozen=True):
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
         node, rdf_id = cls._node_id(id)
+        # catalog
+        catalog_objects = graph.objects(node, cls._get_rdf_property("catalog"))
+        catalog = [Catalogue.from_graph(obj, graph) for obj in catalog_objects]
+        if len(catalog) == 0:
+            catalog = None
         # dataset
         dataset_objects = graph.objects(node, cls._get_rdf_property("dataset"))
         dataset = [Dataset.from_graph(obj, graph) for obj in dataset_objects]
@@ -81,6 +98,11 @@ class Catalogue(RDF, frozen=True):
             publisher = Agent.from_graph(publisher_object, graph) if publisher_object is not None else None
         else:
             publisher = uri(str(publisher_object)) if publisher_object is not None else None
+        # service
+        service_objects = graph.objects(node, cls._get_rdf_property("service"))
+        service = [DataService.from_graph(obj, graph) for obj in service_objects]
+        if len(service) == 0:
+            service = None
         # title
         title_objects = graph.objects(node, cls._get_rdf_property("title"))
         titles = [str(obj) for obj in title_objects]
@@ -93,9 +115,11 @@ class Catalogue(RDF, frozen=True):
         # Catalogue
         return Catalogue(
             rdf_id=rdf_id,
+            catalog=catalog,
             dataset=dataset,
             description=description,
             publisher=publisher,
+            service=service,
             title=title,
         )
 
@@ -117,6 +141,11 @@ class CataloguedResource(Resource, frozen=True):
     creator: Annotated[
         Sequence[RDFRef[Agent]] | None,
         {"rdf_property": "http://purl.org/dc/terms/creator"},
+    ] = None
+
+    conforms_to: Annotated[
+        RDFURIRef | str | None,
+        {"rdf_property": "http://purl.org/dc/terms/conformsTo"},
     ] = None
 
     description: Annotated[
@@ -157,6 +186,12 @@ class CataloguedResource(Resource, frozen=True):
         creator = [Agent.from_graph(obj, graph) for obj in creator_objects]
         if len(creator) == 0:
             creator = None
+        # conforms_to
+        conforms_to = graph.value(node, cls._get_rdf_property("conforms_to"))
+        if type(conforms_to) is rdflib.URIRef:
+            conforms_to = RDFURIRef(uri=str(conforms_to))
+        else:
+            conforms_to = str(conforms_to) if conforms_to else None
         # description
         description_objects = graph.objects(node, cls._get_rdf_property("description"))
         descriptions = [str(obj) for obj in description_objects]
@@ -193,6 +228,7 @@ class CataloguedResource(Resource, frozen=True):
             rdf_id=rdf_id,
             contact_point=contact_point,
             creator=creator,
+            conforms_to=conforms_to,
             description=description,
             is_referenced_by=is_referenced_by,
             licence=licence,
@@ -266,6 +302,59 @@ class Dataset(CataloguedResource, frozen=True):
         )
 
 
+class DataService(CataloguedResource, frozen=True):
+    """
+    A collection of operations that provides access to one or more datasets or data processing functions.
+
+    See also: https://www.w3.org/TR/vocab-dcat-3/#Class:Data_Service
+    """
+
+    rdf_type: RDFType = CataloguedResource.get_rdf_type(extra="http://www.w3.org/ns/dcat#DataService")
+
+    endpoint_description: Annotated[
+        Sequence[RDFRef[Resource] | str] | RDFRef[Resource] | str | None,
+        {"rdf_property": "http://www.w3.org/ns/dcat#endpointDescription"},
+    ] = None
+
+    endpoint_url: Annotated[
+        Sequence[RDFRef[Resource] | str] | RDFRef[Resource] | str | None,
+        {"rdf_property": "http://www.w3.org/ns/dcat#endpointURL"},
+    ] = None
+
+    @classmethod
+    def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
+        node, _ = cls._node_id(id)
+        # CataloguedResource
+        catalogued_resource = CataloguedResource.from_graph(node, graph)
+        catalogued_resource_dict: dict = catalogued_resource.model_dump()
+        catalogued_resource_dict.pop("rdf_type")
+        # endpoint_description
+        endpoint_desc_objects = graph.objects(node, cls._get_rdf_property("endpoint_description"))
+        endpoint_description = [str(obj) for obj in endpoint_desc_objects]
+        if len(endpoint_description) > 1:
+            endpoint_description = endpoint_description
+        elif len(endpoint_description) == 1:
+            endpoint_description = endpoint_description[0]
+        else:
+            endpoint_description = None
+        # endpoint_url
+        endpoint_url_objects = graph.objects(node, cls._get_rdf_property("endpoint_url"))
+        endpoint_url = [str(obj) for obj in endpoint_url_objects]
+        if len(endpoint_url) > 1:
+            endpoint_url = endpoint_url
+        elif len(endpoint_url) == 1:
+            endpoint_url = endpoint_url[0]
+        else:
+            endpoint_url = None
+
+        # DataService
+        return DataService(
+            **catalogued_resource_dict,
+            endpoint_description=endpoint_description,
+            endpoint_url=endpoint_url,
+        )
+
+
 class Distribution(RDF, frozen=True):
     """
     A specific representation of a dataset. A dataset might be available in
@@ -278,6 +367,12 @@ class Distribution(RDF, frozen=True):
     """
 
     rdf_type: RDFType = "http://www.w3.org/ns/dcat#Distribution"
+
+    access_service: Annotated[
+        Sequence[RDFRef["DataService"]] | None,
+        {"rdf_property": "http://www.w3.org/ns/dcat#accessService"},
+    ] = None
+    """A data service that gives access to the distribution of the dataset."""
 
     access_url: Annotated[
         Sequence[RDFRef[Resource] | str] | RDFRef[Resource] | str | None,
@@ -302,6 +397,11 @@ class Distribution(RDF, frozen=True):
     @classmethod
     def from_graph(cls, id: str | rdflib.Node, graph: rdflib.Graph):
         node, rdf_id = cls._node_id(id)
+        # access_service
+        service_objects = graph.objects(node, cls._get_rdf_property("access_service"))
+        service = [DataService.from_graph(obj, graph) for obj in service_objects]
+        if len(service) == 0:
+            service = None
         # access_url
         access_url_objects = graph.objects(node, cls._get_rdf_property("access_url"))
         access_url = [str(obj) for obj in access_url_objects]
@@ -332,6 +432,7 @@ class Distribution(RDF, frozen=True):
         # Distribution
         return Distribution(
             rdf_id=rdf_id,
+            access_service=service,
             access_url=access_url,
             conforms_to=conforms_to,
             description=description,
